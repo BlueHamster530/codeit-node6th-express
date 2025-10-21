@@ -28,7 +28,7 @@ DELETE http://localhost:3000/tasks/68f6e56476ed718158a9d29b
 
 
 ###
-GET https://codeit-node6th-express.onrender.com/tasks
+GET https://codeit-node6th-express.onrender.com/tasks/
 
 ###
 
