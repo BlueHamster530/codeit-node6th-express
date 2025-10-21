@@ -53,7 +53,7 @@ app.get('/tasks', async (req, res) => {
 });
 
 app.get('/tasks/:_id', async (req, res) => {
-  const task = await Task.findByid(req.params._id);
+  const task = await Task.findById(req.params._id);
   if (task) {
     res.send(task);
   } else {
@@ -62,7 +62,7 @@ app.get('/tasks/:_id', async (req, res) => {
 });
 
 app.patch('/tasks/:_id', async (req, res) => {
-  const task = await Task.findByid(req.params._id);
+  const task = await Task.findById(req.params._id);
   if (task) {
     const { body } = req;
     Object.keys(body).forEach((key) => {
@@ -76,7 +76,7 @@ app.patch('/tasks/:_id', async (req, res) => {
 });
 
 app.delete('/tasks/:_id', async (req, res) => {
-  const task = await Task.findByidAndDelete(req.params._id);
+  const task = await Task.findByIdAndDelete(req.params._id);
   if (task) {
     res.sendStatus(200);
     // await task.deleteOne();
