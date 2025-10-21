@@ -1,18 +1,27 @@
 import express from 'express';
-import { tasks } from './mock.js';
+import data from './seedData.js';
+import Task from './task.js';
+import mongoose from 'mongoose';
+import { DATABASE_URL } from './constants.js';
+import cors from 'cors';
 
 const PORT = 3000;
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello from Express server!');
+await mongoose.connect(DATABASE_URL);
+
+app.post('/tasks', async (req, res) => {
+  const newTask = await Task.create(req.body);
+  res.status(201).send(newTask);
 });
 
 app.post('/tasks', (req, res) => {
   const data = req.body;
   console.log(data);
-  const ids = tasks.map((task) => task.id);
+  const ids = data.map((task) => task.id);
   console.log(tasks);
   const nextId = Math.max(...ids) + 1;
   const now = new Date();
@@ -27,29 +36,24 @@ app.post('/tasks', (req, res) => {
   res.status(201).send(newTask);
 });
 
-app.get('/tasks', (req, res) => {
+app.get('/tasks', async (req, res) => {
   /** 쿼리 파라미터
    * - sort : 'oldest'인 경우 오래된 태스크 기준, 나머지 경우 새로운 태스크 기준
    * - count : 태스크 개수
    */
   const sort = req.query.sort;
-  const count = req.query.count;
-  console.log('sort:', sort);
-  console.log('count:', count);
-  const compareFn =
-    sort === 'oldest'
-      ? (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      : (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
-  let newTasks = [...tasks].sort(compareFn);
-  if (count) {
-    newTasks = newTasks.slice(0, Number(count));
+  const count = Number(req.query.count) || 0;
+  if (count <= 0) {
+    return res.json([]);
   }
-  res.send(newTasks);
+  const sortOption = sort === 'oldest' ? ['createdAt', 'asc'] : ['createdAt', 'desc'];
+  const tasks = await Task.find().limit(count).sort([sortOption]);
+
+  res.send(tasks);
 });
 
-app.get('/tasks/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const task = tasks.find((task) => task.id === id);
+app.get('/tasks/:id', async (req, res) => {
+  const task = await Task.findById(req.params.id);
   if (task) {
     res.send(task);
   } else {
@@ -57,26 +61,26 @@ app.get('/tasks/:id', (req, res) => {
   }
 });
 
-app.patch('/tasks/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const task = tasks.find((task) => task.id === id);
+app.patch('/tasks/:id', async (req, res) => {
+  const task = await Task.findById(req.params.id);
   if (task) {
-    Object.keys(req.body).forEach((key) => {
-      task[key] = req.body[key];
+    const { body } = req;
+    Object.keys(body).forEach((key) => {
+      task[key] = body[key];
     });
-    task.updatedAt = new Date();
+    await task.save();
     res.send(task);
   } else {
     res.status(404).send({ message: 'Cannot find given id' });
   }
 });
 
-app.delete('/tasks/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const taskIndex = tasks.findIndex((task) => task.id === id);
-  if (taskIndex !== -1) {
-    const [deletedTask] = tasks.splice(taskIndex, 1);
-    res.send(deletedTask);
+app.delete('/tasks/:id', async (req, res) => {
+  const task = await Task.findByIdAndDelete(req.params.id);
+  if (task) {
+    res.sendStatus(200);
+    // await task.deleteOne();
+    // res.send({ message: 'Task deleted successfully' });
   } else {
     res.status(404).send({ message: 'Cannot find given id' });
   }
