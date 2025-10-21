@@ -1,4 +1,5 @@
 GET http://localhost:3000/tasks?sort=oldest&count=5
+# GET http://localhost:3000/tasks?sort=oldest&count=5
 
 ### // 구분자 요청별로 구분이 필요함
 POST http://localhost:3000/tasks
@@ -23,3 +24,12 @@ Content-Type: application/json
 
 ###
 DELETE http://localhost:3000/tasks/68f6e56476ed718158a9d29b
+
+
+
+###
+GET https://codeit-node6th-express.onrender.com/tasks
+
+###
+
+GET https://codeit-node6th-express.onrender.com/tasks/68f729b9e5f4b9a7adbd5e6d

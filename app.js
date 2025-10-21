@@ -21,13 +21,13 @@ app.post('/tasks', async (req, res) => {
 app.post('/tasks', (req, res) => {
   const data = req.body;
   console.log(data);
-  const ids = data.map((task) => task.id);
+  const _ids = data.map((task) => task._id);
   console.log(tasks);
-  const nextId = Math.max(...ids) + 1;
+  const next_id = Math.max(..._ids) + 1;
   const now = new Date();
   const newTask = {
     ...data,
-    id: nextId,
+    _id: next_id,
     createdAt: now,
     updatedAt: now,
     isComplete: false,
@@ -52,17 +52,17 @@ app.get('/tasks', async (req, res) => {
   res.send(tasks);
 });
 
-app.get('/tasks/:id', async (req, res) => {
-  const task = await Task.findById(req.params.id);
+app.get('/tasks/:_id', async (req, res) => {
+  const task = await Task.findBy_id(req.params._id);
   if (task) {
     res.send(task);
   } else {
-    res.status(404).send({ message: 'Cannot find given id' });
+    res.status(404).send({ message: 'Cannot find given _id' });
   }
 });
 
-app.patch('/tasks/:id', async (req, res) => {
-  const task = await Task.findById(req.params.id);
+app.patch('/tasks/:_id', async (req, res) => {
+  const task = await Task.findBy_id(req.params._id);
   if (task) {
     const { body } = req;
     Object.keys(body).forEach((key) => {
@@ -71,18 +71,18 @@ app.patch('/tasks/:id', async (req, res) => {
     await task.save();
     res.send(task);
   } else {
-    res.status(404).send({ message: 'Cannot find given id' });
+    res.status(404).send({ message: 'Cannot find given _id' });
   }
 });
 
-app.delete('/tasks/:id', async (req, res) => {
-  const task = await Task.findByIdAndDelete(req.params.id);
+app.delete('/tasks/:_id', async (req, res) => {
+  const task = await Task.findBy_idAndDelete(req.params._id);
   if (task) {
     res.sendStatus(200);
     // await task.deleteOne();
     // res.send({ message: 'Task deleted successfully' });
   } else {
-    res.status(404).send({ message: 'Cannot find given id' });
+    res.status(404).send({ message: 'Cannot find given _id' });
   }
 });
 
